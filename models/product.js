@@ -22,7 +22,7 @@ module.exports = class Product {
 
     save() {
         getProductsFromFile(products => {
-            products.push(this);
+            this.id = (products.length + 1).toString();
             fs.writeFile(productsFilePath, JSON.stringify(products), (err) => {
                 console.log(err);
             });
@@ -32,6 +32,12 @@ module.exports = class Product {
 
     static featchAll(cb) {
         getProductsFromFile(cb);
+    }
+
+    static findById(id, cb) {
+        return getProductsFromFile(products => {
+            return cb(products.find(product => product.id === id));
+        });
     }
 
 };
