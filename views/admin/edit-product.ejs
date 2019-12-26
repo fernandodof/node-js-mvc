@@ -10,24 +10,25 @@
         <form class="product-form" action="<%= formAction %>" method="POST">
             <div class="form-control">
                 <label for="title">Title</label>
-                <input type="text" name="title" id="title" value="<%= product.title %>">
+                <input type="text" name="title" ById="title" value="<%= product.title %>">
             </div>
             <div class="form-control">
                 <label for="imageUrl">Image Url</label>
-                <input type="text" name="imageUrl" id="imageUrl" value="<%= product.imageUrl %>">
+                <input type="text" name="imageUrl" ById="imageUrl" value="<%= product.imageUrl %>">
             </div>
 
             <div class="form-control">
                 <label for="price">Price</label>
-                <input type="number" name="price" id="price" step="0.01" value="<%= product.price %>">
+                <input type="number" name="price" ById="price" step="0.01" value="<%= product.price %>">
             </div>
 
             <div class="form-control">
                 <label for="description">Description</label>
-                <textarea type="text" name="description" id="description" rows="5"><%= product.description %></textarea>
+                <textarea type="text" name="description" ById="description"
+                    rows="5"><%= product.description %></textarea>
             </div>
-            <% if (product.id) { %>
-            <input type="hidden" value="<%=product.id%>" name="id">
+            <% if (product._id) { %>
+            <input type="hidden" value="<%=product._id%>" name="id">
             <% } %>
 
             <button class="btn" type="submit"><%= buttonLabel %></button>
