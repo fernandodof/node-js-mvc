@@ -29,6 +29,7 @@
             <% if (product._id) { %>
             <input type="hidden" value="<%=product._id%>" name="id">
             <% } %>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
             <button class="btn" type="submit"><%= buttonLabel %></button>
         </form>

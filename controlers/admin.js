@@ -6,13 +6,11 @@ exports.getAddProduct = (req, res, next) => {
         path: '/admin/add-product',
         buttonLabel: "Add Product",
         formAction: "/admin/add-product",
-        product: {},
-        isAuthenticated: req.session.isAuthenticated
+        product: {}
     });
 };
 
 exports.postAddProduct = (req, res, next) => {
-    // const id = req.params.id;
     const title = req.body.title;
     const imageUrl = req.body.imageUrl;
     const description = req.body.description;
@@ -45,8 +43,7 @@ exports.getEditProduct = (req, res, next) => {
                 editing: editMode,
                 product: product,
                 buttonLabel: "Update Product",
-                formAction: "/admin/edit-product",
-                isAuthenticated: req.session.isAuthenticated
+                formAction: "/admin/edit-product"
             });
         })
         .catch(err => console.log(err));
@@ -78,8 +75,7 @@ exports.getProducts = (req, res, next) => {
             return res.render('admin/products', {
                 products: products,
                 pageTitle: 'Admin Products',
-                path: '/admin/products',
-                isAuthenticated: req.session.isAuthenticated
+                path: '/admin/products'
             });
         }).catch(err => console.log(err));
 };

@@ -4,8 +4,12 @@ const session = require('express-session');
 const mongodbStore = require('connect-mongodb-session')(session);
 const mongoose = require('mongoose');
 const path = require('path');
+const csurf = require('csurf');
+const flash = require('connect-flash');
+
 const rootDir = require('./util/path');
 const errorsControler = require('./controlers/errors');
+const isAuth = require('./middleware/is-auth');
 
 const MONGODB_URI = 'mongodb://localhost:27017/node_complete';
 
@@ -18,7 +22,10 @@ const sessionStore = new mongodbStore({
     collection: 'sessions'
 });
 
-//Routes
+// CSRF token
+const csrfProtection = csurf();
+
+// Routes
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
@@ -35,8 +42,11 @@ app.use(session({
     store: sessionStore
 }));
 
+app.use(csrfProtection);
+
+app.use(flash());
+
 app.use((req, res, next) => {
-    // Get first user (any) 
     if (!req.session.user) {
         return next();
     }
@@ -46,9 +56,15 @@ app.use((req, res, next) => {
             next();
         })
         .catch(err => console.log(err));
-})
+});
 
-app.use('/admin', adminRoutes);
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = req.session.isAuthenticated;
+    res.locals.csrfToken = req.csrfToken();
+    next();
+});
+
+app.use('/admin', isAuth, adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
@@ -56,21 +72,6 @@ app.use(errorsControler.get404);
 
 mongoose.connect(MONGODB_URI)
     .then(() => {
-        User.findOne()
-            .then(user => {
-                // If there is no user create one
-                if (!user) {
-                    const user = new User({
-                        name: 'Fernando',
-                        email: 'fernando@mail.com',
-                        cart: {
-                            items: []
-                        }
-                    });
-                    user.save();
-                }
-            })
-            .catch(err => console.log(err));
         app.listen(3000);
     })
     .catch(err => {
