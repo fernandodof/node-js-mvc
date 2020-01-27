@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const { validationResult } = require('express-validator/check');
 
 exports.getAddProduct = (req, res, next) => {
     return res.render('admin/edit-product', {
@@ -6,7 +7,8 @@ exports.getAddProduct = (req, res, next) => {
         path: '/admin/add-product',
         buttonLabel: "Add Product",
         formAction: "/admin/add-product",
-        product: {}
+        oldInputs: {},
+        validationErrors: []
     });
 };
 
@@ -15,6 +17,20 @@ exports.postAddProduct = (req, res, next) => {
     const imageUrl = req.body.imageUrl;
     const description = req.body.description;
     const price = +req.body.price;
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.render('admin/edit-product', {
+            pageTitle: 'Edit product',
+            path: '/admin/add-product',
+            editing: false,
+            buttonLabel: 'Update Product',
+            formAction: '/admin/add-product',
+            oldInputs: { title, price, description, imageUrl },
+            validationErrors: errors.array().reduce((map, value) => (map[value.param] = value.msg, map), {})
+        });
+    }
 
     const product = new Product({
         title: title,
@@ -41,9 +57,10 @@ exports.getEditProduct = (req, res, next) => {
                 pageTitle: 'Edit product',
                 path: '/admin/edit-product',
                 editing: editMode,
-                product: product,
-                buttonLabel: "Update Product",
-                formAction: "/admin/edit-product"
+                buttonLabel: 'Update Product',
+                formAction: '/admin/edit-product',
+                oldInputs: product,
+                validationErrors: []
             });
         })
         .catch(err => console.log(err));
@@ -55,10 +72,25 @@ exports.postEditProduct = (req, res, next) => {
     const price = req.body.price;
     const description = req.body.description;
     const imageUrl = req.body.imageUrl;
+    const editMode = req.query.edit === 'true';
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.render('admin/edit-product', {
+            pageTitle: 'Edit product',
+            path: '/admin/edit-product',
+            editing: editMode,
+            buttonLabel: 'Update Product',
+            formAction: '/admin/edit-product',
+            oldInputs: { _id: id, title, price, description, imageUrl },
+            validationErrors: errors.array().reduce((map, value) => (map[value.param] = value.msg, map), {})
+        });
+    }
 
     Product.findById(id)
         .then(product => {
-            if (product.userId.toString() === req.user._id.toString()) {
+            if (product.userId.toString() !== req.user._id.toString()) {
                 return res.redirect('/');
             }
 

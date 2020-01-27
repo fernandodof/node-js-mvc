@@ -7,25 +7,38 @@
     <%- include('../partials/navigation.ejs') %>
 
     <main>
-        <% if (errorMessage) { %>
-        <div class="user-message user-message--error"><%= errorMessage %></div>
-        <% } %>
         <form class="login-form" action="/signup" method="POST">
             <div class="form-control">
                 <label for="email">Name</label>
-                <input type="text" name="name" id="name">
+                <input class="<%= validationErrors.name ? 'invalid' : '' %>" type="text" name="name" id="name"
+                    value="<%= oldInputs.name %>">
+                <% if(validationErrors.name) {%>
+                <span class="input-msg input-msg--error"><%=validationErrors.name %></span>
+                <% } %>
             </div>
             <div class="form-control">
                 <label for="email">Email</label>
-                <input type="text" name="email" id="email">
+                <input class="<%= validationErrors.email ? 'invalid' : '' %>" type="text" name="email" id="email"
+                    value="<%= oldInputs.email %>">
+                <% if(validationErrors.email) {%>
+                <span class="input-msg input-msg--error"><%=validationErrors.email %></span>
+                <% } %>
             </div>
             <div class="form-control">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="password">
+                <input class="<%= validationErrors.password ? 'invalid' : '' %>" type="password" name="password"
+                    id="password" value="<%= oldInputs.password %>">
+                <% if(validationErrors.password) {%>
+                <span class="input-msg input-msg--error"><%=validationErrors.password %></span>
+                <% } %>
             </div>
             <div class="form-control">
                 <label for="confirmPassword">Confirm Password</label>
-                <input type="password" name="confirmPassword" id="confirmPassword">
+                <input class="<%= validationErrors.confirmPassword ? 'invalid' : '' %>" type="password"
+                    name="confirmPassword" id="confirmPassword" value="<%= oldInputs.confirmPassword %>">
+                <% if(validationErrors.confirmPassword) {%>
+                <span class="input-msg input-msg--error"><%=validationErrors.confirmPassword %></span>
+                <% } %>
             </div>
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button class="btn" type="submit">Signup</button>

@@ -21,3 +21,19 @@
 .form-control textarea:focus {
    outline-color: #00695c;
 }
+
+.form-control input.invalid,
+.form-control textarea.invalid {
+   border-color: #b52626;
+}
+
+.form-control .input-msg {
+   font-size: 12px;
+   text-align: justify;
+   width: 100%;
+   display: flex;
+}
+
+.form-control .input-msg--error {
+   color: #b52626;
+}

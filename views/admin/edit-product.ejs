@@ -10,24 +10,40 @@
         <form class="product-form" action="<%= formAction %>" method="POST">
             <div class="form-control">
                 <label for="title">Title</label>
-                <input type="text" name="title" id="title" value="<%= product.title %>">
+                <input class="<%= validationErrors.title ? 'invalid' : '' %>" type="text" name="title" id="title"
+                    value="<%= oldInputs.title %>">
+                <% if(validationErrors.title) {%>
+                <span class="input-msg input-msg--error"><%=validationErrors.title %></span>
+                <% } %>
             </div>
             <div class="form-control">
                 <label for="imageUrl">Image Url</label>
-                <input type="text" name="imageUrl" id="imageUrl" value="<%= product.imageUrl %>">
+                <input class="<%= validationErrors.imageUrl ? 'invalid' : '' %>" type="text" name="imageUrl"
+                    id="imageUrl" value="<%= oldInputs.imageUrl %>">
+                <% if(validationErrors.imageUrl) {%>
+                <span class="input-msg input-msg--error"><%=validationErrors.imageUrl %></span>
+                <% } %>
             </div>
 
             <div class="form-control">
                 <label for="price">Price</label>
-                <input type="number" name="price" id="price" step="0.01" value="<%= product.price %>">
+                <input class="<%= validationErrors.price ? 'invalid' : '' %>" type="number" name="price" id="price"
+                    step="0.01" value="<%= oldInputs.price || '' %>">
+                <% if(validationErrors.price) {%>
+                <span class="input-msg input-msg--error"><%=validationErrors.price %></span>
+                <% } %>
             </div>
 
             <div class="form-control">
                 <label for="description">Description</label>
-                <textarea type="text" name="description" id="description" rows="5"><%= product.description %></textarea>
+                <textarea class="<%= validationErrors.description ? 'invalid' : '' %>" type="text" name="description"
+                    id="description" rows="5"><%= oldInputs.description %></textarea>
+                <% if(validationErrors.description) {%>
+                <span class="input-msg input-msg--error"><%=validationErrors.description %></span>
+                <% } %>
             </div>
-            <% if (product._id) { %>
-            <input type="hidden" value="<%=product._id%>" name="id">
+            <% if (oldInputs._id) { %>
+            <input type="hidden" value="<%=oldInputs._id%>" name="id">
             <% } %>
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
