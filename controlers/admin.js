@@ -1,6 +1,9 @@
 const Product = require('../models/product');
 const { validationResult } = require('express-validator/check');
 
+const mongoose = require("mongoose");
+const { returnError } = require('./../util/utilFunctions');
+
 exports.getAddProduct = (req, res, next) => {
     return res.render('admin/edit-product', {
         pageTitle: 'Add product',
@@ -39,7 +42,6 @@ exports.postAddProduct = (req, res, next) => {
         imageUrl: imageUrl,
         userId: req.user // or req.user._id 
     });
-
     product.save()
         .then(() => res.redirect('/admin/products'))
         .catch(err => console.log(err));

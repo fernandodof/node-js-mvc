@@ -52,10 +52,14 @@ app.use((req, res, next) => {
     }
     User.findById(req.session.user._id)
         .then(user => {
+            if (!user) {
+                return next();
+            }
+
             req.user = user;
             next();
         })
-        .catch(err => console.log(err));
+        .catch(() => next(new Error("Error Trying to find the user")));
 });
 
 app.use((req, res, next) => {
@@ -69,6 +73,17 @@ app.use(shopRoutes);
 app.use(authRoutes);
 
 app.use(errorsControler.get404);
+
+app.get('/500', errorsControler.get500);
+
+app.use((err, req, res, next) => {
+    return res.render('500', {
+        pageTitle: '500 - Error!!!',
+        path: '/500',
+        isAuthenticated: req.session.isAuthenticated
+    });
+});
+
 
 mongoose.connect(MONGODB_URI)
     .then(() => {
