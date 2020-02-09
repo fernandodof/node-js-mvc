@@ -3,8 +3,11 @@ const sendgridTransport = require('nodemailer-sendgrid-transport');
 const crypto = require('crypto');
 const { validationResult } = require('express-validator/check');
 
+const { returnError } = require('./../util/utilFunctions');
+
 const User = require('../models/user');
 const sendgridConfig = require('../sendgrid-config.json');
+
 
 const transporter = nodemailer.createTransport(sendgridTransport({
     auth: {
@@ -47,7 +50,6 @@ exports.postLogin = (req, res, next) => {
                         req.session.user = user;
 
                         return req.session.save((err) => {
-                            console.log(err);
                             res.redirect('/');
                         });
                     }
@@ -55,12 +57,11 @@ exports.postLogin = (req, res, next) => {
                     return showLoginAgain(res, oldInputs, []);
                 });
         })
-        .catch(err => console.log(err));
+        .catch(err => returnError(err, next));
 };
 
 exports.postLogout = (req, res, next) => {
     req.session.destroy((err) => {
-        console.log(err);
         res.redirect('/');
     });
 };
@@ -111,10 +112,10 @@ exports.postSignup = (req, res, next) => {
                 });
             }
             catch (err) {
-                return console.log(err);
+                return returnError(err, next)
             }
         })
-        .catch(err => console.log(err));
+        .catch(err => returnError(err, next));
 };
 
 exports.getReset = (req, res, next) => {
@@ -128,7 +129,6 @@ exports.getReset = (req, res, next) => {
 exports.postReset = (req, res, next) => {
     crypto.randomBytes(32, (err, buffer) => {
         if (err) {
-            console.log(err);
             return res.redirect('/reset-password');
         }
 
@@ -159,12 +159,10 @@ exports.postReset = (req, res, next) => {
                     });
                 }
                 catch (err) {
-                    return console.log(err);
+                    return returnError(err, next)
                 }
             })
-            .catch(err => {
-                console.log(err);
-            })
+            .catch(err => returnError(err, next));
     });
 }
 
@@ -185,7 +183,7 @@ exports.getNewPassword = (req, res, next) => {
 
             res.redirect('/');
         })
-        .catch(err => console.log(err));
+        .catch(err => returnError(err, next));
 };
 
 exports.postNewPassword = (req, res, next) => {
@@ -203,7 +201,7 @@ exports.postNewPassword = (req, res, next) => {
         return user.save();
     }).then(() => {
         return res.redirect('/login');
-    }).catch(err => console.log(err))
+    }).catch(err => returnError(err, next));
 }
 
 function showLoginAgain(res, oldInputs, validationErrors) {
@@ -215,9 +213,3 @@ function showLoginAgain(res, oldInputs, validationErrors) {
         validationErrors: validationErrors
     });
 }
-
-// function flashLoginErrorMessage(req) {
-//     req.flash('error', 'Invalid email or password.');
-// }
-
-

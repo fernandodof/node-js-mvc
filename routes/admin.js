@@ -6,12 +6,11 @@ const adminController = require('../controlers/admin');
 const validateProduct = () => {
     return [
         body('title', 'Product title is required').trim().custom((value) => {
-            if (value.length < 3) {
-                throw new Error('Product title must me at least 3 chraracters long')
+            if (value.length < 2) {
+                throw new Error('Product title must me at least 2 chraracters long')
             }
             return true;
         }),
-        body('imageUrl', 'Image url is invalid').isURL(),
         body('price', 'Price is invalid').isNumeric(),
         body('description').trim().custom((value) => {
             if (value.length < 10) {

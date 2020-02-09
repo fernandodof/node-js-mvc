@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const csurf = require('csurf');
 const flash = require('connect-flash');
+const multer = require('multer');
 
 const rootDir = require('./util/path');
 const errorsControler = require('./controlers/errors');
@@ -30,11 +31,31 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 
+// file storage
+const fileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'images');
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${new Date().getTime()}-${file.originalname}`);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
+        cb(null, true);
+    } else {
+        cb(null, false);
+    }
+};
+
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(multer({ storage: fileStorage, fileFilter }).single('image'));
 app.use(express.static(path.join(rootDir, 'public')));
+app.use("/images", express.static(path.join(rootDir, 'images')));
 app.use(session({
     secret: 'bbb673d8-2a62-11ea-978f-2e728ce88125',
     resave: false,
@@ -77,6 +98,7 @@ app.use(errorsControler.get404);
 app.get('/500', errorsControler.get500);
 
 app.use((err, req, res, next) => {
+    console.log(err);
     return res.render('500', {
         pageTitle: '500 - Error!!!',
         path: '/500',
@@ -84,8 +106,7 @@ app.use((err, req, res, next) => {
     });
 });
 
-
-mongoose.connect(MONGODB_URI)
+mongoose.connect(MONGODB_URI, { useUnifiedTopology: true })
     .then(() => {
         app.listen(3000);
     })
