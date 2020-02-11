@@ -18,3 +18,14 @@ exports.deleteFile = (filePath) => {
         }
     });
 };
+
+exports.generatePaginationData = (page, pageSize, total) => {
+    return {
+        currentPage: page,
+        hasNext: pageSize * page < total,
+        hasPrevious: page > 1,
+        nextPage: page + 1,
+        previousPage: page - 1,
+        lastPage: Math.ceil(total / pageSize)
+    };
+};

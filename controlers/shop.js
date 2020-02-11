@@ -3,15 +3,27 @@ const path = require('path');
 const PDFDocument = require('pdfkit');
 const Product = require('./../models/product');
 const Order = require('./../models/order');
-const { returnError } = require('./../util/utilFunctions');
+const { returnError, generatePaginationData } = require('./../util/utilFunctions');
+
+const PAGE_SIZE = 1;
 
 exports.getProducts = (req, res, next) => {
-    Product.find()
+    const page = +req.query.page || 1;
+    let total;
+
+    return Product.find().countDocuments()
+        .then(count => {
+            total = count;
+            return Product.find()
+                .skip((page - 1) * PAGE_SIZE)
+                .limit(PAGE_SIZE);
+        })
         .then(products => {
-            return res.render('shop/product-list', {
+            return res.render('shop/index', {
                 products: products,
                 pageTitle: 'All Products',
-                path: '/products'
+                path: '/products',
+                paginationData: generatePaginationData(page, PAGE_SIZE, total)
             });
         })
         .catch(err => returnError(err, next));
@@ -32,12 +44,22 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-    Product.find()
-        .then((products) => {
+    const page = +req.query.page || 1;
+    let total;
+
+    return Product.find().countDocuments()
+        .then(count => {
+            total = count;
+            return Product.find()
+                .skip((page - 1) * PAGE_SIZE)
+                .limit(PAGE_SIZE);
+        })
+        .then(products => {
             return res.render('shop/index', {
                 products: products,
                 pageTitle: 'Shop',
-                path: '/'
+                path: '/',
+                paginationData: generatePaginationData(page, PAGE_SIZE, total)
             });
         })
         .catch(err => returnError(err, next));
