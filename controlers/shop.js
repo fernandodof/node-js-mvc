@@ -1,10 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const PDFDocument = require('pdfkit');
+const stripeConfig = require('./../stripe.config');
+const stripe = require('stripe')(stripeConfig.key);
 const Product = require('./../models/product');
 const Order = require('./../models/order');
 const { returnError, generatePaginationData } = require('./../util/utilFunctions');
-
 const PAGE_SIZE = 1;
 
 exports.getProducts = (req, res, next) => {
@@ -97,9 +98,13 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.postOrder = (req, res, next) => {
+    let total;
+    let buyer;
     req.user.populate('cart.items.productId')
         .execPopulate()
         .then(user => {
+            total = user.cart.items.reduce((total, product) => (total + product.productId.price), 0)
+            buyer = user;
             const products = user.cart.items.map(item => {
                 return {
                     product: { ...item.productId._doc },
@@ -115,12 +120,39 @@ exports.postOrder = (req, res, next) => {
             })
             return order.save();
         })
-        .then(() => req.user.clearCart())
+        .then(result => {
+            const charge = stripe.charges.create({
+                amount: total * 100,
+                currency: 'eur',
+                description: `Test order - ${buyer.name} - ${new Date().toISOString()}`,
+                source: req.body.stripeToken,
+                metadata: { order_id: result._id.toString() }
+            });
+
+            req.user.clearCart();
+        })
         .then(() => res.redirect('/orders'))
         .catch(err => returnError(err, next));
 };
 
+exports.getCheckout = (req, res, next) => {
+    req.user.populate('cart.items.productId')
+        .execPopulate()
+        .then(user => {
+            const products = user.cart.items;
+
+            res.render('shop/checkout', {
+                pageTitle: 'Checkout',
+                path: '/checkout',
+                cart: products,
+                total: products.reduce((total, product) => (total + product.productId.price), 0)
+            });
+        })
+        .catch(err => returnError(err, next));
+};
+
 exports.getOrders = (req, res, next) => {
+    console.log(res.locals);
     Order.find({ 'user.userId': req.user._id })
         .then(orders => {
             res.render('shop/orders', {
@@ -169,6 +201,5 @@ exports.getInvoice = (req, res, next) => {
             // file.pipe(res);
         })
         .catch(err => returnError(err, next));
-
 
 };

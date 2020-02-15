@@ -11,6 +11,7 @@ const multer = require('multer');
 const rootDir = require('./util/path');
 const errorsControler = require('./controlers/errors');
 const isAuth = require('./middleware/is-auth');
+const shopController = require('./controlers/shop');
 
 const MONGODB_URI = 'mongodb://localhost:27017/node_complete';
 
@@ -63,9 +64,10 @@ app.use(session({
     store: sessionStore
 }));
 
-app.use(csrfProtection);
-
-app.use(flash());
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = req.session.isAuthenticated;
+    next();
+});
 
 app.use((req, res, next) => {
     if (!req.session.user) {
@@ -83,8 +85,11 @@ app.use((req, res, next) => {
         .catch(() => next(new Error("Error Trying to find the user")));
 });
 
+//payment
+app.post('/create-order', isAuth, shopController.postOrder);
+
+app.use(csrfProtection);
 app.use((req, res, next) => {
-    res.locals.isAuthenticated = req.session.isAuthenticated;
     res.locals.csrfToken = req.csrfToken();
     next();
 });

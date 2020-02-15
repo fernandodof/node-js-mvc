@@ -32,7 +32,6 @@ exports.postAddProduct = (req, res, next) => {
             ...validationErrors,
             ...errors.array().reduce((map, value) => (map[value.param] = value.msg, map), {})
         }
-        console.log("!errors.isEmpty() || !image");
         return res.render('admin/edit-product', {
             pageTitle: 'Edit product',
             path: '/admin/add-product',
@@ -134,8 +133,8 @@ exports.getProducts = (req, res, next) => {
 
 };
 
-exports.postDeleteProduct = (req, res, next) => {
-    const id = req.body.id;
+exports.deleteProduct = (req, res, next) => {
+    const id = req.params.id;
 
     Product.findById(id)
         .then(product => {
@@ -145,6 +144,6 @@ exports.postDeleteProduct = (req, res, next) => {
             deleteFile(product.imageUrl);
             return Product.deleteOne({ _id: id, userId: req.user._id });
         })
-        .then(() => res.redirect('/admin/products'))
-        .catch(err => returnError(err, next));
+        .then(() => res.status(200).json({ success: true, message: "product deleted" }))
+        .catch(err => res.status(500).json({ success: false, message: "product deleted" }));
 };
